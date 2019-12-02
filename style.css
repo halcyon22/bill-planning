@@ -1,0 +1,39 @@
+
+#sortable {
+  text-align: center;
+  width: 600px;
+  margin: 0 auto;
+  padding: 0;
+}
+
+.top-row {
+  width: 600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-around;
+}
+
+.top-row input {
+  margin: 0 .5em 0 .5em;
+}
+
+.controls {
+  display: flex;
+  align-items: center;
+}
+
+#sortable li {
+  margin: 0 3px 3px 3px;
+  padding: 0.4em;
+  font-size: 1.4em;
+  height: 18px;
+}
+
+#sortable input {
+  margin: 0 .3em 0 .3em;
+}
+
+input.money {
+  width: 8em;
+  text-align: right;
+}
