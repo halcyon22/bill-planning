@@ -58,7 +58,11 @@ function save() {
 }
 
 function load() {
-  const data = JSON.parse(localStorage.getItem("billdata"));
+  let data = [];
+  if (localStorage.getItem("billdata")) {
+    data = JSON.parse(localStorage.getItem("billdata"));
+  }
+ 
   console.log(`loaded ${data.length}`);
 
   // defaults
@@ -75,6 +79,8 @@ function load() {
       line.appendTo("#sortable");
     });
   
+    save();
+
   // rebuild from storage
   } else {
     data.forEach(function(value){
