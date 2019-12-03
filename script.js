@@ -174,6 +174,7 @@ const payees = [
   "verizon",
   "xcel",
   "target",
+  "garbage",
   "centerpoint",
   "charter",
   "kohls",
