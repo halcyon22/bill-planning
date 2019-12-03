@@ -112,11 +112,15 @@ function initRowEvents(row) {
 
   if (row) {
     const amountElem = $(row).children(".amount")[0];
-    const sumElem = $(row).children(".sum")[0];
     new AutoNumeric(amountElem, amountConfig);
+    $(amountElem).on("autoNumeric:rawValueModified", onChange);
+
+    const sumElem = $(row).children(".sum")[0];
     new AutoNumeric(sumElem, sumConfig);
   } else {
     AutoNumeric.multiple(".amount", amountConfig);
+    $(".amount").on("autoNumeric:rawValueModified", onChange);
+    
     AutoNumeric.multiple(".sum", sumConfig);
   }
 }
@@ -186,5 +190,6 @@ const amountConfig = {
 };
 
 const sumConfig = {
-  currencySymbol: "$"
+  currencySymbol: "$",
+  noEventListeners: true
 };
