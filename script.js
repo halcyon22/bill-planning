@@ -105,7 +105,7 @@ function load() {
 }
 
 function initRowEvents(row) {
-  $(".datepicker").datepicker();
+  $(".datepicker").datepicker(datepickerConfig);
   // $(".amount").change(onChange);
   $(".payee").autocomplete(autocompleteConfig);
   $(".deleteRow").on("click", deleteRow);
@@ -120,7 +120,7 @@ function initRowEvents(row) {
   } else {
     AutoNumeric.multiple(".amount", amountConfig);
     $(".amount").on("autoNumeric:rawValueModified", onChange);
-    
+
     AutoNumeric.multiple(".sum", sumConfig);
   }
 }
@@ -160,6 +160,10 @@ function localDate() {
   let local = new Date();
   local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
   return local.toJSON().slice(0, 10);
+}
+
+const datepickerConfig = {
+  dateFormat: $.datepicker.ISO_8601
 }
 
 const payees = [
