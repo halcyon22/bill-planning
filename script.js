@@ -25,13 +25,16 @@ function doCalc() {
 }
 
 function addRow() {
-  const allLi = $("#sortable li");
-  const lastLi = allLi[allLi.length - 1];
-  const newLi = $(lastLi).clone(false);
-  $(newLi).children(".payee").val("");
-  $(newLi).appendTo("#sortable");
-  
-  initRowEvents();
+
+  let row = $("<li/>");
+  makeInputs(row, {
+    date: localDate(),
+    amount: 100.01,
+    payee: ""
+  });
+  row.appendTo("#sortable");
+
+  initRowEvents(row);
   onChange();
 }
 
@@ -68,15 +71,15 @@ function load() {
   // defaults
   if (data.length == 0) {
     payees.forEach(function(value) {
-      let line = $("<li/>");
+      let row = $("<li/>");
       
-      makeInputs(line, {
+      makeInputs(row, {
         date: localDate(),
         amount: 100.01,
         payee: value
       });
 
-      line.appendTo("#sortable");
+      row.appendTo("#sortable");
     });
   
     save();
@@ -84,15 +87,15 @@ function load() {
   // rebuild from storage
   } else {
     data.forEach(function(value){
-      let line = $("<li/>");
+      let row = $("<li/>");
       
-      makeInputs(line, {
+      makeInputs(row, {
         date: value.date,
         amount: value.amount,
         payee: value.payee
       });
 
-      line.appendTo("#sortable");
+      row.appendTo("#sortable");
     });
   }
 
@@ -101,45 +104,47 @@ function load() {
   doCalc();
 }
 
-function initRowEvents() {
+function initRowEvents(row) {
   $(".datepicker").datepicker();
   // $(".amount").change(onChange);
   $(".payee").autocomplete(autocompleteConfig);
   $(".deleteRow").on("click", deleteRow);
 
-  AutoNumeric.multiple(".amount", {
-    currencySymbol: "$",
-    showOnlyNumbersOnFocus: true
-  });
-  AutoNumeric.multiple(".sum", {
-    currencySymbol: "$"
-  });
+  if (row) {
+    const amountElem = $(row).children(".amount")[0];
+    const sumElem = $(row).children(".sum")[0];
+    new AutoNumeric(amountElem, amountConfig);
+    new AutoNumeric(sumElem, sumConfig);
+  } else {
+    AutoNumeric.multiple(".amount", amountConfig);
+    AutoNumeric.multiple(".sum", sumConfig);
+  }
 }
 
-function makeInputs(line, options) {
+function makeInputs(row, options) {
   $("<input/>", {
     size: 6,
     "class": "datepicker",
     value: options.date
-  }).appendTo(line);
+  }).appendTo(row);
   $("<input/>", {
     "class": "amount money",
     value: options.amount
-  }).appendTo(line);
+  }).appendTo(row);
   $("<input/>", {
     "class": "sum money",
     disabled: true
-  }).appendTo(line);
+  }).appendTo(row);
   $("<input/>", {
     size: 10,
     "class": "payee",
     value: options.payee
-  }).appendTo(line);
+  }).appendTo(row);
   $("<input/>", {
     type: "button",
     "class": "deleteRow",
     value: "x"
-  }).appendTo(line);
+  }).appendTo(row);
 }
 
 function onChange() {
@@ -173,4 +178,13 @@ const autocompleteConfig = {
   source: payees,
   delay: 0,
   change: onChange
+};
+
+const amountConfig = {
+  currencySymbol: "$",
+  showOnlyNumbersOnFocus: true
+};
+
+const sumConfig = {
+  currencySymbol: "$"
 };
