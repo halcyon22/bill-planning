@@ -31,9 +31,29 @@
 
 #sortable input {
   margin: 0 .3em 0 .3em;
+  padding: 5px;
+  border-width: 1px;
+  border-radius: 5%;
 }
 
 input.money {
   width: 8em;
   text-align: right;
+}
+
+input.sum {
+  color: #424242;
+  background-color: #FAFAFA;
+}
+
+input.money.positive {
+  background-color: #EFFBF5;
+}
+
+input.money.negative {
+  background-color: #FBEFEF;
+}
+
+input.money.low {
+  background-color: #FBEFEF;
 }

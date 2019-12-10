@@ -44,13 +44,19 @@ function deleteRow(event) {
   onChange();
 }
 
+var debounce = null;
 function save() {
+  clearTimeout(debounce);
+  debounce = setTimeout(doSave, 100);
+}
+
+function doSave() {
   const items = $("#sortable li");
   let data = [];
   for (let i = 0; i < items.length; i++) {
     data[i] = {
       date: $(items[i]).children(".datepicker").val(),
-      amount: $(items[i]).children(".amount").val(),
+      amount: $(items[i]).children(".amount").val().replace(/[^\d\.\-]/g, ''),
       payee: $(items[i]).children(".payee").val()
     };
   }
@@ -106,23 +112,55 @@ function load() {
 
 function initRowEvents(row) {
   $(".datepicker").datepicker(datepickerConfig);
-  // $(".amount").change(onChange);
   $(".payee").autocomplete(autocompleteConfig);
   $(".deleteRow").on("click", deleteRow);
 
   if (row) {
     const amountElem = $(row).children(".amount")[0];
     new AutoNumeric(amountElem, amountConfig);
-    $(amountElem).on("autoNumeric:rawValueModified", onChange);
+    $(amountElem).on("autoNumeric:rawValueModified", onAmountChange);
 
     const sumElem = $(row).children(".sum")[0];
     new AutoNumeric(sumElem, sumConfig);
+    $(sumElem).on("autoNumeric:rawValueModified", onSumChange);
   } else {
     AutoNumeric.multiple(".amount", amountConfig);
-    $(".amount").on("autoNumeric:rawValueModified", onChange);
+    $(".amount").on("autoNumeric:rawValueModified", onAmountChange);
 
     AutoNumeric.multiple(".sum", sumConfig);
+    $(".sum").on("autoNumeric:rawValueModified", onSumChange);
   }
+}
+
+function onAmountChange(event) {
+  
+  const newval = event.detail.newRawValue;
+  if (newval > 0) {
+    $(event.target).addClass('positive').removeClass('negative');
+  } else if (newval < 0) {
+    $(event.target).addClass('negative').removeClass('positive');
+  } else {
+    $(event.target).removeClass('negative').removeClass('positive');
+  }
+
+  onChange();
+}
+
+function onSumChange(event) {
+  
+  const newval = event.detail.newRawValue;
+  if (newval < 1000) {
+    $(event.target).addClass('low');
+  } else {
+    $(event.target).removeClass('low');
+  }
+
+  onChange();
+}
+
+function onChange() {
+  doCalc();
+  save();
 }
 
 function makeInputs(row, options) {
@@ -131,10 +169,14 @@ function makeInputs(row, options) {
     "class": "datepicker",
     value: options.date
   }).appendTo(row);
+
+  let sign = options.amount > 0 ? "positive" : "";
+  sign = options.amount < 0 ? "negative" : sign;
   $("<input/>", {
-    "class": "amount money",
+    "class": `amount money ${sign}`,
     value: options.amount
   }).appendTo(row);
+  
   $("<input/>", {
     "class": "sum money",
     disabled: true
@@ -149,11 +191,6 @@ function makeInputs(row, options) {
     "class": "deleteRow",
     value: "x"
   }).appendTo(row);
-}
-
-function onChange() {
-  doCalc();
-  save();
 }
 
 function localDate() {
