@@ -50,10 +50,6 @@ input.money.positive {
   background-color: #EFFBF5;
 }
 
-input.money.negative {
-  background-color: #FBEFEF;
-}
-
-input.money.low {
+input.money.negative, input.money.low {
   background-color: #FBEFEF;
 }

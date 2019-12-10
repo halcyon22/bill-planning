@@ -110,26 +110,25 @@ function load() {
   doCalc();
 }
 
-function initRowEvents(row) {
+function initRowEvents(singleRow) {
   $(".datepicker").datepicker(datepickerConfig);
   $(".payee").autocomplete(autocompleteConfig);
   $(".deleteRow").on("click", deleteRow);
 
-  if (row) {
-    const amountElem = $(row).children(".amount")[0];
-    new AutoNumeric(amountElem, amountConfig);
-    $(amountElem).on("autoNumeric:rawValueModified", onAmountChange);
-
-    const sumElem = $(row).children(".sum")[0];
-    new AutoNumeric(sumElem, sumConfig);
-    $(sumElem).on("autoNumeric:rawValueModified", onSumChange);
+  let amountElem = ".amount";
+  let sumElem = ".sum";
+  if (!singleRow) {
+    AutoNumeric.multiple(amountElem, amountConfig);
+    AutoNumeric.multiple(sumElem, sumConfig);
   } else {
-    AutoNumeric.multiple(".amount", amountConfig);
-    $(".amount").on("autoNumeric:rawValueModified", onAmountChange);
+    amountElem = $(singleRow).children(".amount")[0];
+    new AutoNumeric(amountElem, amountConfig);
 
-    AutoNumeric.multiple(".sum", sumConfig);
-    $(".sum").on("autoNumeric:rawValueModified", onSumChange);
+    sumElem = $(singleRow).children(".sum")[0];
+    new AutoNumeric(sumElem, sumConfig);
   }
+  $(amountElem).on("autoNumeric:rawValueModified", onAmountChange);
+  $(sumElem).on("autoNumeric:rawValueModified", onSumChange);
 }
 
 function onAmountChange(event) {
