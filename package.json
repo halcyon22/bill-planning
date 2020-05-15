@@ -15,5 +15,13 @@
   "bugs": {
     "url": "https://github.com/halcyon22/bill-planning/issues"
   },
-  "homepage": "https://github.com/halcyon22/bill-planning#readme"
+  "homepage": "https://github.com/halcyon22/bill-planning#readme",
+  "devDependencies": {
+    "eslint": "^7.0.0",
+    "eslint-config-standard": "^14.1.1",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.1"
+  }
 }
