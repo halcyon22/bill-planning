@@ -1,0 +1,19 @@
+{
+  "name": "bill-planning",
+  "version": "1.0.0",
+  "description": "Monthly income vs bill planning",
+  "main": "script.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/halcyon22/bill-planning.git"
+  },
+  "author": "Mike Partridge <halcyon22@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/halcyon22/bill-planning/issues"
+  },
+  "homepage": "https://github.com/halcyon22/bill-planning#readme"
+}

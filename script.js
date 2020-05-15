@@ -1,8 +1,8 @@
 $(function() {
   $("#sortable").sortable();
   $("#sortable").disableSelection();
+  $("#nextMonth").on("click", nextMonth);
   $("#addRow").on("click", addRow);
-  $("#calc").on("click", doCalc);
   $("#sortable").on("sortupdate", onChange);
 
   load();
@@ -36,6 +36,20 @@ function addRow() {
 
   initRowEvents(row);
   onChange();
+}
+
+function nextMonth() {
+  const items = $("#sortable li");
+  for (let i = 0; i < items.length; i++) {
+    const li = items[i];
+    let current = $(li).children(".datepicker").datepicker("getDate");
+    let day = current.getDate();
+    current.setMonth(current.getMonth() + 1);
+    if (current.getDate() != day) {
+      current.setDate(0);
+    }
+    $(li).children(".datepicker").datepicker("setDate", current);
+  }
 }
 
 function deleteRow(event) {
@@ -216,7 +230,8 @@ const payees = [
   "kohls",
   "sienna",
   "mortgage",
-  "braces"
+  "braces",
+  "investment"
 ];
 
 const autocompleteConfig = {
