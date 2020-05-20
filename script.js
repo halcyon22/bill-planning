@@ -1,3 +1,4 @@
+/* eslint-disable no-new */
 $(function () {
   $('#sortable').sortable();
   $('#sortable').disableSelection();
@@ -134,37 +135,13 @@ function initRowEvents (singleRow) {
     AutoNumeric.multiple(sumElem, sumConfig);
   } else {
     amountElem = $(singleRow).children('.amount')[0];
-    AutoNumeric(amountElem, amountConfig);
+    new AutoNumeric(amountElem, amountConfig);
 
     sumElem = $(singleRow).children('.sum')[0];
-    AutoNumeric(sumElem, sumConfig);
+    new AutoNumeric(sumElem, sumConfig);
   }
-  $(amountElem).on('autoNumeric:rawValueModified', onAmountChange);
-  $(sumElem).on('autoNumeric:rawValueModified', onSumChange);
-}
-
-function onAmountChange (event) {
-  const newval = event.detail.newRawValue;
-  if (newval > 0) {
-    $(event.target).addClass('positive').removeClass('negative');
-  } else if (newval < 0) {
-    $(event.target).addClass('negative').removeClass('positive');
-  } else {
-    $(event.target).removeClass('negative').removeClass('positive');
-  }
-
-  onChange();
-}
-
-function onSumChange (event) {
-  const newval = event.detail.newRawValue;
-  if (newval < 1000) {
-    $(event.target).addClass('low');
-  } else {
-    $(event.target).removeClass('low');
-  }
-
-  onChange();
+  $(amountElem).on('autoNumeric:rawValueModified', onChange);
+  $(sumElem).on('autoNumeric:rawValueModified', onChange);
 }
 
 function onChange () {
@@ -238,10 +215,23 @@ const autocompleteConfig = {
 
 const amountConfig = {
   currencySymbol: '$',
-  showOnlyNumbersOnFocus: true
+  showOnlyNumbersOnFocus: true,
+  styleRules: {
+    positive: 'positive',
+    negative: 'negative'
+  }
 };
 
 const sumConfig = {
   currencySymbol: '$',
-  noEventListeners: true
+  noEventListeners: true,
+  styleRules: {
+    ranges: [
+      {
+        min: 0,
+        max: 1000,
+        class: 'low'
+      }
+    ]
+  }
 };
