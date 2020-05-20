@@ -1,4 +1,3 @@
-/* eslint-disable no-new */
 $(function () {
   $('#sortable').sortable();
   $('#sortable').disableSelection();
@@ -134,11 +133,11 @@ function initRowEvents (singleRow) {
     AutoNumeric.multiple(amountElem, amountConfig);
     AutoNumeric.multiple(sumElem, sumConfig);
   } else {
-    amountElem = $(singleRow).children('.amount')[0];
-    new AutoNumeric(amountElem, amountConfig);
+    amountElem = $(singleRow).children(amountElem)[0];
+    AutoNumeric.multiple([amountElem], amountConfig);
 
-    sumElem = $(singleRow).children('.sum')[0];
-    new AutoNumeric(sumElem, sumConfig);
+    sumElem = $(singleRow).children(sumElem)[0];
+    AutoNumeric.multiple([sumElem], sumConfig);
   }
   $(amountElem).on('autoNumeric:rawValueModified', onChange);
   $(sumElem).on('autoNumeric:rawValueModified', onChange);
