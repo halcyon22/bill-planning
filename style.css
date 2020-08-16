@@ -1,25 +1,17 @@
 
-#sortable {
+body {
   text-align: center;
-  width: 600px;
-  margin: 0 auto;
-  padding: 0;
-}
-
-.top-row {
-  width: 600px;
-  margin: 0 auto;
-  display: flex;
   justify-content: space-around;
+  margin: 0 auto;
 }
 
-.top-row input {
-  margin: 0 .5em 0 .5em;
+h1,h2 {
+  margin-top: 2em;
 }
 
-.controls {
-  display: flex;
-  align-items: center;
+#sortable {
+  margin: 2em auto;
+  padding: 0;
 }
 
 #sortable li {
@@ -52,4 +44,20 @@ input.money.positive {
 
 input.money.negative, input.money.low {
   background-color: #FBEFEF;
+}
+
+.controls {
+  margin: .5em auto;
+}
+
+#options {
+  display: flex;
+  justify-content: space-around;
+  margin: .5em auto;
+}
+
+#options input {
+  margin: .5em 1em;
+  padding: 5px;
+  width: 50em;
 }

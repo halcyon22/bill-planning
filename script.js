@@ -4,6 +4,9 @@ $(function () {
   $('#nextMonth').on('click', nextMonth);
   $('#addRow').on('click', addRow);
   $('#sortable').on('sortupdate', onChange);
+  $('#save').on('click', saveToBackend);
+  $('#load').on('click', loadFromBackend);
+  $('#clear').on('click', clearBackendConfig);
 
   load();
 });
@@ -73,18 +76,64 @@ function doSave () {
     };
   }
 
-  localStorage.setItem('billdata', JSON.stringify(data));
+  const backend = getBackendConfig();
+  if (backend.url) {
+    console.log(`Saving to ${backend.url} with API key ${backend.apiKey}`);
 
-  console.log(`saved ${data.length} : ${new Date().toLocaleTimeString()}`);
+    fetch(backend.url, {
+      method: 'PUT',
+      headers: {
+        'x-api-key': backend.apiKey,
+        'Content-Type': 'application/json; charset=utf-8'
+      },
+      body: JSON.stringify(data)
+    })
+      .then(response => {
+        console.log(`Saved ${data.length} : ${new Date().toLocaleTimeString()}`);
+      })
+      .catch(error => {
+        console.error('Save failed:', error);
+        showError('Save failed');
+      });
+  } else {
+    localStorage.setItem('billdata', JSON.stringify(data));
+    console.log(`Saved ${data.length} : ${new Date().toLocaleTimeString()}`);
+  }
 }
 
 function load () {
-  let data = [];
-  if (localStorage.getItem('billdata')) {
-    data = JSON.parse(localStorage.getItem('billdata'));
-  }
+  const backend = getBackendConfig();
+  if (backend.url) {
+    console.log(`Fetching from ${backend.url} with API key ${backend.apiKey}`);
 
-  console.log(`loaded ${data.length}`);
+    fetch(backend.url, {
+      headers: {
+        'x-api-key': backend.apiKey,
+        Accept: 'application/json; charset=utf-8'
+      }
+    })
+      .then(response => response.json())
+      .then(json => {
+        populate(json);
+
+        $('#apiUrl').val(backend.url);
+        $('#apiKey').val(backend.apiKey);
+      })
+      .catch(error => {
+        console.error('Fetch failed:', error);
+        showError('Fetch failed');
+      });
+  } else {
+    console.log('Loading from localStorage');
+
+    if (localStorage.getItem('billdata')) {
+      populate(JSON.parse(localStorage.getItem('billdata')));
+    }
+  }
+}
+
+function populate (data) {
+  console.log(`populating ${data.length} rows`);
 
   // defaults
   if (data.length === 0) {
@@ -120,6 +169,16 @@ function load () {
   initRowEvents();
 
   doCalc();
+
+  clearLoadingHeader();
+}
+
+function clearLoadingHeader () {
+  $('#loading').hide();
+}
+
+function showError (errorMessage) {
+  $('#loading').show().html(`Error: ${errorMessage}`);
 }
 
 function initRowEvents (singleRow) {
@@ -182,6 +241,38 @@ function localDate () {
   const local = new Date();
   local.setMinutes(local.getMinutes() - local.getTimezoneOffset());
   return local.toJSON().slice(0, 10);
+}
+
+function saveToBackend () {
+  const backend = {
+    url: $('#apiUrl').val(),
+    apiKey: $('#apiKey').val()
+  };
+  localStorage.setItem('backend', JSON.stringify(backend));
+
+  doSave();
+}
+
+function loadFromBackend () {
+  const backend = {
+    url: $('#apiUrl').val(),
+    apiKey: $('#apiKey').val()
+  };
+  localStorage.setItem('backend', JSON.stringify(backend));
+
+  location.reload();
+}
+
+function getBackendConfig () {
+  const backend = localStorage.getItem('backend');
+  return JSON.parse(backend) || {};
+}
+
+function clearBackendConfig () {
+  localStorage.removeItem('backend');
+  doSave();
+
+  location.reload();
 }
 
 const datepickerConfig = {

@@ -8,15 +8,28 @@
 </head>
 <body>
 
-<div class="top-row">
-  <h1 class="heading">Bill Planning</h1>
-  <div class="controls">
-    <span><input type="button" value="add row" id="addRow"/></span>
-    <span><input type="button" value="next" id="nextMonth"/></span>
-  </div>
-</div>
+<h1>Bill Planning</h1>
+<h2 id="loading">Loading</h2>
 
 <ul id="sortable"></ul>
+
+<div class="controls">
+  <input type="button" value="add row" id="addRow"/>
+  <input type="button" value="next month" id="nextMonth"/>
+</div>
+
+<h2>Options</h2>
+<div id="options">
+  <table>
+    <tr><td><label for="apiUrl">Backend URL</label></td><td><input id="apiUrl" /></td></tr>
+    <tr><td><label for="apiKey">API Key</label></td><td><input id="apiKey" /></td></tr>
+  </table>
+</div>
+<div class="controls">
+  <input type="button" value="save" id="save"/>
+  <input type="button" value="load" id="load"/>
+  <input type="button" value="clear" id="clear"/>
+</div>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'></script>
