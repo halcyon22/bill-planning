@@ -28,6 +28,11 @@ h1,h2 {
   border-radius: 5%;
 }
 
+input.datepicker {
+  width: 7em;
+  text-align: center;
+}
+
 input.money {
   width: 8em;
   text-align: right;
