@@ -1,35 +1,61 @@
 <!DOCTYPE html>
-<html lang="en" >
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Bill Planning</title>
   <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
   <link rel="stylesheet" href="./style.css">
 </head>
 <body>
 
-<h1>Bill Planning</h1>
+<header class="appbar">
+  <h1>Bill Planning</h1>
+  <button type="button" id="optionsToggle" class="iconBtn" aria-haspopup="dialog" aria-label="Options" title="Options">
+    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+      <circle cx="12" cy="12" r="3"/>
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+    </svg>
+  </button>
+</header>
+
 <h2 id="loading">Loading</h2>
 
-<ul id="sortable"></ul>
+<main class="ledger">
+  <div class="ledgerHead" aria-hidden="true">
+    <span></span>
+    <span>Date</span>
+    <span class="num">Amount</span>
+    <span class="num">Running Total</span>
+    <span>Payee</span>
+    <span></span>
+  </div>
+  <ul id="sortable"></ul>
+</main>
 
 <div class="controls">
-  <input type="button" value="add row" id="addRow"/>
-  <input type="button" value="next month" id="nextMonth"/>
+  <button type="button" id="addRow" class="btn">Add row</button>
+  <button type="button" id="nextMonth" class="btn">Next month</button>
 </div>
 
-<h2>Options</h2>
-<div id="options">
-  <table>
-    <tr><td><label for="apiUrl">Backend URL</label></td><td><input id="apiUrl" /></td></tr>
-    <tr><td><label for="apiKey">API Key</label></td><td><input id="apiKey" /></td></tr>
-  </table>
-</div>
-<div class="controls">
-  <input type="button" value="save" id="save"/>
-  <input type="button" value="load" id="load"/>
-  <input type="button" value="clear" id="clear"/>
-</div>
+<dialog id="optionsDialog" aria-labelledby="optionsTitle">
+  <div class="dialogBody">
+    <h2 id="optionsTitle">Options</h2>
+
+    <label for="apiUrl">Backend URL</label>
+    <input id="apiUrl" type="url" inputmode="url" spellcheck="false" autocomplete="off" placeholder="https://example.com/bills">
+
+    <label for="apiKey">API Key</label>
+    <input id="apiKey" type="password" spellcheck="false" autocomplete="off">
+
+    <div class="dialogActions">
+      <button type="button" id="save" class="btn btn-primary">Save</button>
+      <button type="button" id="load" class="btn">Load</button>
+      <button type="button" id="clear" class="btn btn-danger">Clear</button>
+      <button type="button" id="optionsClose" class="btn btn-ghost">Close</button>
+    </div>
+  </div>
+</dialog>
 
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js'></script>
 <script src='https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'></script>

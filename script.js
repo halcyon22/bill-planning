@@ -1,12 +1,35 @@
 $(function () {
-  $('#sortable').sortable();
-  $('#sortable').disableSelection();
+  $('#sortable').sortable({
+    handle: '.dragHandle',
+    axis: 'y',
+    tolerance: 'pointer',
+    distance: 3,
+    placeholder: 'rowPlaceholder',
+    forcePlaceholderSize: true
+  });
   $('#nextMonth').on('click', nextMonth);
   $('#addRow').on('click', addRow);
   $('#sortable').on('sortupdate', onChange);
+  $('#sortable').on('click', '.deleteRow', deleteRow);
   $('#save').on('click', saveToBackend);
   $('#load').on('click', loadFromBackend);
   $('#clear').on('click', clearBackendConfig);
+
+  const optionsDialog = document.getElementById('optionsDialog');
+  $('#optionsToggle').on('click', function () {
+    const backend = getBackendConfig();
+    $('#apiUrl').val(backend.url || '');
+    $('#apiKey').val(backend.apiKey || '');
+    optionsDialog.showModal();
+  });
+  $('#optionsClose').on('click', function () {
+    optionsDialog.close();
+  });
+  optionsDialog.addEventListener('click', function (event) {
+    if (event.target === optionsDialog) {
+      optionsDialog.close();
+    }
+  });
 
   load();
 });
@@ -27,16 +50,18 @@ function doCalc () {
 }
 
 function addRow () {
-  const row = $('<li/>');
-  makeInputs(row, {
-    date: localDate(),
-    amount: 100.01,
-    payee: ''
-  });
-  row.appendTo('#sortable');
+  withoutSaving(function () {
+    const row = $('<li/>');
+    makeInputs(row, {
+      date: localDate(),
+      amount: 100.01,
+      payee: ''
+    });
+    row.appendTo('#sortable');
 
-  initRowEvents(row);
-  onChange();
+    initRowEvents(row);
+    doCalc();
+  });
 }
 
 function nextMonth () {
@@ -54,13 +79,27 @@ function nextMonth () {
 }
 
 function deleteRow (event) {
-  $(event.target.parentElement).remove();
+  $(event.currentTarget).closest('li').remove();
 
   onChange();
 }
 
 var debounce = null;
+var suppressSave = false;
+
+function withoutSaving (fn) {
+  suppressSave = true;
+  try {
+    fn();
+  } finally {
+    suppressSave = false;
+  }
+}
+
 function save () {
+  if (suppressSave) {
+    return;
+  }
   clearTimeout(debounce);
   debounce = setTimeout(doSave, 100);
 }
@@ -126,9 +165,7 @@ function load () {
   } else {
     console.log('Loading from localStorage');
 
-    if (localStorage.getItem('billdata')) {
-      populate(JSON.parse(localStorage.getItem('billdata')));
-    }
+    populate(JSON.parse(localStorage.getItem('billdata') || '[]'));
   }
 }
 
@@ -184,7 +221,6 @@ function showError (errorMessage) {
 function initRowEvents (singleRow) {
   $('.datepicker').datepicker(datepickerConfig);
   $('.payee').autocomplete(autocompleteConfig);
-  $('.deleteRow').on('click', deleteRow);
 
   let amountElem = '.amount';
   let sumElem = '.sum';
@@ -207,10 +243,30 @@ function onChange () {
   save();
 }
 
+const DRAG_HANDLE_SVG =
+  '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor" aria-hidden="true" focusable="false">' +
+  '<circle cx="6" cy="3" r="1.4"/><circle cx="10" cy="3" r="1.4"/>' +
+  '<circle cx="6" cy="8" r="1.4"/><circle cx="10" cy="8" r="1.4"/>' +
+  '<circle cx="6" cy="13" r="1.4"/><circle cx="10" cy="13" r="1.4"/></svg>';
+
+const TRASH_SVG =
+  '<svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" ' +
+  'stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">' +
+  '<path d="M4 7h16"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2"/>' +
+  '<path d="M6 7l1 13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-13"/>' +
+  '<path d="M10 11v6"/><path d="M14 11v6"/></svg>';
+
 function makeInputs (row, options) {
+  $('<span/>', {
+    class: 'dragHandle',
+    'aria-hidden': 'true',
+    html: DRAG_HANDLE_SVG
+  }).appendTo(row);
+
   $('<input/>', {
     size: 6,
     class: 'datepicker',
+    'aria-label': 'Date',
     value: options.date
   }).appendTo(row);
 
@@ -218,22 +274,27 @@ function makeInputs (row, options) {
   sign = options.amount < 0 ? 'negative' : sign;
   $('<input/>', {
     class: `amount money ${sign}`,
+    'aria-label': 'Amount',
     value: options.amount
   }).appendTo(row);
 
   $('<input/>', {
     class: 'sum money',
+    'aria-label': 'Running total',
     disabled: true
   }).appendTo(row);
   $('<input/>', {
     size: 10,
     class: 'payee',
+    'aria-label': 'Payee',
     value: options.payee
   }).appendTo(row);
-  $('<input/>', {
+  $('<button/>', {
     type: 'button',
     class: 'deleteRow',
-    value: 'x'
+    'aria-label': 'Delete row',
+    title: 'Delete row',
+    html: TRASH_SVG
   }).appendTo(row);
 }
 
@@ -251,6 +312,8 @@ function saveToBackend () {
   localStorage.setItem('backend', JSON.stringify(backend));
 
   doSave();
+
+  document.getElementById('optionsDialog').close();
 }
 
 function loadFromBackend () {
@@ -316,6 +379,7 @@ const sumConfig = {
   currencySymbol: '$',
   noEventListeners: true,
   styleRules: {
+    negative: 'negative',
     ranges: [
       {
         min: 0,

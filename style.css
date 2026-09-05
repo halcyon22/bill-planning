@@ -1,68 +1,527 @@
+/* ---------- design tokens ---------- */
 
-body {
-  text-align: center;
-  justify-content: space-around;
-  margin: 0 auto;
+:root {
+  color-scheme: light dark;
+
+  /* surfaces & text (light) */
+  --bg:            #f4f6f8;
+  --surface:       #ffffff;
+  --surface-2:     #e9edf2;
+  --surface-3:     #dde3ea;
+  --row-hover:     #f7f9fb;
+  --border:        #d5dbe2;
+  --border-strong: #b6bfc9;
+  --text:          #1a1f24;
+  --text-muted:    #5c6773;
+  --text-faint:    #8a949f;
+
+  /* accent */
+  --accent:          #2563eb;
+  --accent-contrast: #ffffff;
+  --focus:           #2563eb;
+  --danger:          #c0332e;
+
+  /* money semantics: one hue per state, tints are derived below */
+  --pos: #0f7a4f;
+  --neg: #c0332e;
+  --low: #a8700a;
+
+  /* geometry / type */
+  --radius:    8px;
+  --radius-sm: 6px;
+  --radius-lg: 12px;
+  --gap:       .5rem;
+  --row-min-h: 2.6rem;
+  --shadow-1: 0 1px 2px rgb(0 0 0 / .06);
+  --shadow-2: 0 8px 24px rgb(0 0 0 / .14), 0 2px 6px rgb(0 0 0 / .08);
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  /* grid tracks -- shared by the header row and every list row */
+  --col-handle: 1.75rem;
+  --col-date:   8.5rem;
+  --col-amount: minmax(6.5rem, 1fr);
+  --col-sum:    minmax(6.5rem, 1fr);
+  --col-payee:  minmax(8rem, 1.4fr);
+  --col-del:    2.25rem;
 }
 
-h1,h2 {
-  margin-top: 2em;
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:            #101317;
+    --surface:       #1a1e24;
+    --surface-2:     #232931;
+    --surface-3:     #2d343d;
+    --row-hover:     #1f242b;
+    --border:        #333b45;
+    --border-strong: #4a545f;
+    --text:          #e6eaef;
+    --text-muted:    #9aa5b1;
+    --text-faint:    #6b7682;
+
+    --accent:          #4f8cff;
+    --accent-contrast: #0b0e12;
+    --focus:           #74a4ff;
+    --danger:          #ff7b72;
+
+    --pos: #4ade80;
+    --neg: #ff7b72;
+    --low: #e3b341;
+
+    --shadow-1: 0 1px 2px rgb(0 0 0 / .5);
+    --shadow-2: 0 10px 30px rgb(0 0 0 / .6), 0 2px 8px rgb(0 0 0 / .4);
+  }
+}
+
+/* ---------- base ---------- */
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 1.0625rem;
+  background: var(--bg);
+  color: var(--text);
+}
+
+h1, h2 { margin: 0; }
+
+/* #loading doubles as the error banner (toggled via jQuery .hide()/.show(),
+   which writes inline `display`) -- never set `display` here. */
+#loading {
+  max-width: 56rem;
+  margin: 1.25rem auto 0;
+  padding: 0 1rem;
+  font-size: .95rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ---------- app bar ---------- */
+
+.appbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 0;
+}
+
+.appbar h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.iconBtn {
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.iconBtn:hover {
+  background: var(--surface-2);
+  color: var(--text);
+}
+.iconBtn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* ---------- ledger ---------- */
+
+.ledger {
+  max-width: 56rem;
+  margin: 1.5rem auto;
+  padding: 0 1rem;
+}
+
+.ledgerHead,
+#sortable li {
+  display: grid;
+  grid-template-columns:
+    var(--col-handle) var(--col-date) var(--col-amount)
+    var(--col-sum) var(--col-payee) var(--col-del);
+  column-gap: var(--gap);
+  align-items: center;
+}
+
+.ledgerHead {
+  padding: 0 .5rem .5rem;
+  font-size: .78rem;
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
 }
 
 #sortable {
-  margin: 2em auto;
+  list-style: none;
+  margin: .5rem 0 0;
   padding: 0;
 }
 
 #sortable li {
-  margin: 0 3px 3px 3px;
-  padding: 0.4em;
-  font-size: 1.4em;
-  height: 18px;
+  min-height: var(--row-min-h);
+  padding: .35rem .5rem;
+  margin: 0 0 4px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  box-shadow: inset 0 0 0 1px var(--border), var(--shadow-1);
+  transition: background-color .12s, box-shadow .12s;
+}
+#sortable li:hover { background: var(--row-hover); }
+#sortable li:focus-within {
+  box-shadow: inset 0 0 0 1px var(--accent), var(--shadow-1);
 }
 
-#sortable input {
-  margin: 0 .3em 0 .3em;
-  padding: 5px;
-  border-width: 1px;
-  border-radius: 5%;
+#sortable li.rowPlaceholder {
+  background: color-mix(in oklab, var(--accent) 8%, var(--surface));
+  box-shadow: inset 0 0 0 2px color-mix(in oklab, var(--accent) 45%, transparent);
+  border-radius: var(--radius);
 }
 
-input.datepicker {
-  width: 7em;
-  text-align: center;
+#sortable li.ui-sortable-helper {
+  box-shadow: inset 0 0 0 1px var(--accent), var(--shadow-2);
+  background: var(--surface);
+  opacity: .95;
 }
+
+/* ---------- drag handle ---------- */
+
+.dragHandle {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--text-faint);
+  cursor: grab;
+  -webkit-user-select: none;
+  user-select: none;
+  border-radius: var(--radius-sm);
+}
+.dragHandle:active { cursor: grabbing; }
+#sortable li:hover .dragHandle { color: var(--text-muted); }
+.dragHandle svg { pointer-events: none; display: block; }
+
+/* ---------- row inputs ---------- */
+
+#sortable li > input {
+  width: 100%;
+  min-width: 0;
+  padding: .4rem .5rem;
+  font: inherit;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+#sortable li > input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+input.datepicker { text-align: center; }
 
 input.money {
-  width: 8em;
   text-align: right;
-}
-
-input.sum {
-  color: #424242;
-  background-color: #FAFAFA;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
 
 input.money.positive {
-  background-color: #EFFBF5;
+  color: var(--pos);
+  background: color-mix(in oklab, var(--pos) 6%, var(--surface));
+  border-color: color-mix(in oklab, var(--pos) 22%, var(--border));
+}
+input.money.negative {
+  color: var(--neg);
+  font-weight: 600;
+  background: color-mix(in oklab, var(--neg) 12%, var(--surface));
+  border-color: color-mix(in oklab, var(--neg) 40%, var(--border));
+  box-shadow: inset 3px 0 0 var(--neg);
+}
+input.money.low {
+  color: var(--low);
+  font-weight: 600;
+  background: color-mix(in oklab, var(--low) 12%, var(--surface));
+  border-color: color-mix(in oklab, var(--low) 40%, var(--border));
+  box-shadow: inset 3px 0 0 var(--low);
 }
 
-input.money.negative, input.money.low {
-  background-color: #FBEFEF;
+/* disabled running-total field -- Chrome/Safari ignore `color` on :disabled
+   controls unless -webkit-text-fill-color is set, and Safari dims via opacity */
+input.sum {
+  background: var(--surface-2);
+  color: var(--text-muted);
+  -webkit-text-fill-color: currentColor;
+  opacity: 1;
+  cursor: default;
 }
+input.sum.low      { -webkit-text-fill-color: currentColor; }
+input.sum.negative { -webkit-text-fill-color: currentColor; }
+
+/* ---------- delete button ---------- */
+
+.deleteRow {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  padding: 0;
+  background: transparent;
+  color: var(--text-faint);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity .12s, background-color .12s, color .12s;
+}
+#sortable li:hover .deleteRow,
+#sortable li:focus-within .deleteRow,
+.deleteRow:focus-visible {
+  opacity: 1;
+}
+.deleteRow:hover {
+  background: color-mix(in oklab, var(--danger) 12%, transparent);
+  color: var(--danger);
+}
+.deleteRow:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+.deleteRow svg { pointer-events: none; display: block; }
+
+/* ---------- buttons ---------- */
 
 .controls {
-  margin: .5em auto;
-}
-
-#options {
+  max-width: 56rem;
+  margin: 1rem auto;
+  padding: 0 1rem;
   display: flex;
-  justify-content: space-around;
-  margin: .5em auto;
+  gap: .5rem;
 }
 
-#options input {
-  margin: .5em 1em;
-  padding: 5px;
-  width: 50em;
+.btn {
+  padding: .55rem 1rem;
+  font: inherit;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+.btn:hover { background: var(--surface-2); }
+.btn:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.btn-primary {
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.btn-primary:hover { background: color-mix(in oklab, var(--accent) 85%, black); }
+.btn-danger { color: var(--danger); }
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+}
+
+/* ---------- options dialog ---------- */
+
+#optionsDialog {
+  padding: 0;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-2);
+  width: min(30rem, calc(100vw - 2rem));
+  max-width: none;
+}
+#optionsDialog::backdrop {
+  background: rgb(0 0 0 / .5);
+  backdrop-filter: blur(2px);
+}
+
+.dialogBody {
+  display: grid;
+  gap: .4rem;
+  padding: 1.25rem 1.5rem 1.5rem;
+}
+.dialogBody h2 {
+  font-size: 1.05rem;
+  margin-bottom: .5rem;
+}
+.dialogBody label {
+  font-size: .8rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin-top: .4rem;
+}
+.dialogBody input {
+  width: 100%;
+  padding: .5rem .6rem;
+  font: inherit;
+  background: var(--surface-2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.dialogBody input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 1px;
+}
+
+.dialogActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .5rem;
+  margin-top: 1rem;
+}
+.dialogActions .btn-ghost { margin-inline-start: auto; }
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 46rem) {
+  :root {
+    --col-date:   minmax(0, 1fr);
+    --col-payee:  minmax(0, 1.2fr);
+  }
+}
+
+@media (max-width: 34rem) {
+  .ledgerHead { display: none; }
+
+  #sortable li {
+    grid-template-columns: var(--col-handle) minmax(0, 1fr) minmax(0, 1fr) var(--col-del);
+    grid-template-areas:
+      "handle date   amount del"
+      "handle payee  sum    del";
+    row-gap: .35rem;
+    padding: .5rem;
+  }
+  #sortable li > .dragHandle  { grid-area: handle; }
+  #sortable li > .datepicker  { grid-area: date; }
+  #sortable li > .amount      { grid-area: amount; }
+  #sortable li > .payee       { grid-area: payee; }
+  #sortable li > .sum         { grid-area: sum; }
+  #sortable li > .deleteRow   { grid-area: del; opacity: 1; }
+}
+
+/* ==========================================================================
+   jQuery UI overrides -- the base theme (loaded before this file) hardcodes
+   light colors for the datepicker popup and the payee autocomplete menu.
+   Selectors below intentionally mirror jQuery UI's own compound selectors:
+   the base theme's rules are equally or more specific, so a bare
+   `.ui-state-default` here would lose to `.ui-widget-content .ui-state-default`
+   regardless of source order. Both popups are appended to <body>, so none of
+   this is scoped under .ledger. Never set `display` on .ui-datepicker /
+   .ui-autocomplete -- jQuery shows/hides them and a stylesheet rule would
+   fight the inline style it writes.
+   ========================================================================== */
+
+.ui-widget,
+.ui-widget input, .ui-widget select, .ui-widget textarea, .ui-widget button {
+  font-family: inherit;
+}
+#ui-datepicker-div, .ui-autocomplete {
+  box-shadow: var(--shadow-2);
+}
+.ui-autocomplete {
+  max-height: 16rem;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.ui-menu .ui-menu-item-wrapper {
+  padding: .45em 1em .45em .6em;
+}
+
+@media (prefers-color-scheme: dark) {
+  .ui-widget-content,
+  .ui-widget.ui-widget-content {
+    background: var(--surface);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .ui-widget-content a { color: var(--text); }
+  .ui-widget-header {
+    background: var(--surface-2);
+    color: var(--text);
+    border-color: var(--border);
+  }
+  .ui-widget-header a { color: var(--text); }
+
+  .ui-state-default,
+  .ui-widget-content .ui-state-default,
+  .ui-widget-header  .ui-state-default {
+    background: var(--surface-2);
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .ui-state-hover,  .ui-widget-content .ui-state-hover,  .ui-widget-header .ui-state-hover,
+  .ui-state-focus,  .ui-widget-content .ui-state-focus,  .ui-widget-header .ui-state-focus {
+    background: var(--surface-3);
+    border-color: var(--border-strong);
+    color: var(--text);
+  }
+  .ui-state-active, .ui-widget-content .ui-state-active, .ui-widget-header .ui-state-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+  .ui-state-active a, .ui-state-active a:link, .ui-state-active a:visited {
+    color: var(--accent-contrast);
+  }
+  .ui-state-highlight,
+  .ui-widget-content .ui-state-highlight,
+  .ui-widget-header  .ui-state-highlight {
+    background: transparent;
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .ui-priority-secondary,
+  .ui-widget-content .ui-priority-secondary {
+    opacity: .4;
+  }
+
+  .ui-datepicker .ui-datepicker-title { color: var(--text); }
+  .ui-datepicker th { color: var(--text-muted); }
+  .ui-datepicker select.ui-datepicker-month,
+  .ui-datepicker select.ui-datepicker-year {
+    background: var(--surface-2);
+    color: var(--text);
+    border: 1px solid var(--border);
+  }
+  .ui-datepicker .ui-datepicker-buttonpane { border-top-color: var(--border); }
+  .ui-datepicker-unselectable .ui-state-default {
+    background: transparent;
+    border-color: transparent;
+  }
+
+  .ui-menu .ui-menu-item-wrapper { color: var(--text); }
+  .ui-menu .ui-menu-item-wrapper.ui-state-active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+  }
+  .ui-menu .ui-menu-divider { border-top-color: var(--border); }
+
+  /* prev/next month arrows are sprite images painted from a dark PNG --
+     invisible on a dark header, so repoint to the theme's white sprite
+     (already referenced by the base theme for .ui-state-active .ui-icon) */
+  .ui-icon,
+  .ui-widget-content .ui-icon,
+  .ui-widget-header  .ui-icon {
+    background-image: url("https://code.jquery.com/ui/1.12.1/themes/base/images/ui-icons_ffffff_256x240.png");
+  }
 }
